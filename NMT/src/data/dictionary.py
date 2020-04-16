@@ -107,7 +107,13 @@ class Dictionary(object):
                 skipped += 1
                 continue
             line = line.rstrip().split()
+            if len(line)!=2: 
+                skipped += 1
+                continue
             assert len(line) == 2, (i, line)
+            if word2id.get(line[0]) is not None:
+                skipped += 1 # Already present. So, skipping
+                continue
             assert line[0] not in word2id and line[1].isdigit(), (i, line)
             word2id[line[0]] = 4 + SPECIAL_WORDS + i - skipped  # shift because of extra words
         f.close()

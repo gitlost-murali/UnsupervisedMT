@@ -177,7 +177,7 @@ echo "HSB monolingual data concatenated in: $TGT_RAW"
 if ! [[ -f "$SRC_TOK" && -f "$TGT_TOK" ]]; then
   echo "Tokenize monolingual data..."
   cat $SRC_RAW | $NORM_PUNC -l de | $TOKENIZER -l de -no-escape -threads $N_THREADS > $SRC_TOK
-  cat $TGT_RAW | $NORM_PUNC -l en | $TOKENIZER -l en -no-escape -threads $N_THREADS > $TGT_TOK
+  cat $TGT_RAW | $NORM_PUNC -l de | $TOKENIZER -l de -no-escape -threads $N_THREADS > $TGT_TOK
 fi
 echo "DE monolingual data tokenized in: $SRC_TOK"
 echo "HSB monolingual data tokenized in: $TGT_TOK"
@@ -215,8 +215,8 @@ if ! [[ -f "$SRC_TOK.$CODES.pth" && -f "$TGT_TOK.$CODES.pth" ]]; then
   $UMT_PATH/preprocess.py $FULL_VOCAB $SRC_TOK.$CODES
   $UMT_PATH/preprocess.py $FULL_VOCAB $TGT_TOK.$CODES
 fi
-echo "HSB binarized data in: $SRC_TOK.$CODES.pth"
-echo "DE binarized data in: $TGT_TOK.$CODES.pth"
+echo "DE binarized data in: $SRC_TOK.$CODES.pth"
+echo "HSB binarized data in: $TGT_TOK.$CODES.pth"
 
 #
 # Download parallel data (for evaluation only)
