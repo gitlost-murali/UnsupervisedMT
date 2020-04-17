@@ -188,7 +188,7 @@ if [ ! -f "$SRC_BPE_CODES" ]; then
  echo "BPE learned in $SRC_BPE_CODES"
 
  # apply BPE codes
-if ! [[ -f "$SRC_TOK_CODES" ]]; then
+if ! [[ -f "$EMBED_SRC_TOK_CODES" ]]; then
    echo "Applying BPE codes..."
    $FASTBPE applybpe $EMBED_SRC_TOK_CODES $EMBED_SRC_TOK $SRC_BPE_CODES
  fi
