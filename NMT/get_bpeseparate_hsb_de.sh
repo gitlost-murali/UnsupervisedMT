@@ -148,12 +148,12 @@ wget -c http://www.statmt.org/wmt14/training-monolingual-news-crawl/news.2008.de
 wget -c http://www.statmt.org/wmt14/training-monolingual-news-crawl/news.2009.de.shuffled.gz
 wget -c http://www.statmt.org/wmt14/training-monolingual-news-crawl/news.2010.de.shuffled.gz
 wget -c http://www.statmt.org/wmt14/training-monolingual-news-crawl/news.2011.de.shuffled.gz
-wget -c http://www.statmt.org/wmt14/training-monolingual-news-crawl/news.2012.de.shuffled.gz
-wget -c http://www.statmt.org/wmt14/training-monolingual-news-crawl/news.2013.de.shuffled.gz
-wget -c http://www.statmt.org/wmt15/training-monolingual-news-crawl-v2/news.2014.de.shuffled.v2.gz
-wget -c http://data.statmt.org/wmt16/translation-task/news.2015.de.shuffled.gz
-wget -c http://data.statmt.org/wmt17/translation-task/news.2016.de.shuffled.gz
-wget -c http://data.statmt.org/wmt18/translation-task/news.2017.de.shuffled.deduped.gz
+# wget -c http://www.statmt.org/wmt14/training-monolingual-news-crawl/news.2012.de.shuffled.gz
+# wget -c http://www.statmt.org/wmt14/training-monolingual-news-crawl/news.2013.de.shuffled.gz
+# wget -c http://www.statmt.org/wmt15/training-monolingual-news-crawl-v2/news.2014.de.shuffled.v2.gz
+# wget -c http://data.statmt.org/wmt16/translation-task/news.2015.de.shuffled.gz
+# wget -c http://data.statmt.org/wmt17/translation-task/news.2016.de.shuffled.gz
+# wget -c http://data.statmt.org/wmt18/translation-task/news.2017.de.shuffled.deduped.gz
 
 # decompress monolingual data
 for FILENAME in news*gz; do
@@ -169,7 +169,7 @@ done
 # concatenate monolingual data files
 if ! [[ -f "$EMBED_SRC_RAW" ]]; then
   echo "Concatenating monolingual data..."
-  cat $(ls news*de* | grep -v gz) $N_MONO > $EMBED_SRC_RAW
+  cat $(ls news*de* | grep -v gz) > $EMBED_SRC_RAW
 fi
 echo "DE monolingual data concatenated in: $EMBED_SRC_RAW"
 
