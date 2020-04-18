@@ -166,15 +166,15 @@ for FILENAME in news*gz; do
   fi
 done
 
-# concatenate monolingual data files
-if ! [[ -f "$EMBED_SRC_RAW" ]]; then
+# concatenate monolingual data files  #[[ -f "$EMBED_SRC_RAW"  ||  -f "$EMBED_SRC_TOK_CODES.vec" ]]
+if ! [[ -f "$EMBED_SRC_RAW"  ||  -f "$EMBED_SRC_TOK_CODES.vec" ]]; then
   echo "Concatenating monolingual data..."
   cat $(ls news*de* | grep -v gz) > $EMBED_SRC_RAW
 fi
 echo "DE monolingual data concatenated in: $EMBED_SRC_RAW"
 
 # tokenize data
-if ! [[ -f "$EMBED_SRC_TOK" ]]; then
+if ! [[ -f "$EMBED_SRC_TOK" || -f "$EMBED_SRC_TOK_CODES.vec" ]]; then
   echo "Tokenize monolingual data..."
   cat $EMBED_SRC_RAW | $NORM_PUNC -l de | $TOKENIZER -l de -no-escape -threads $N_THREADS > $EMBED_SRC_TOK
 fi
@@ -188,7 +188,7 @@ if [ ! -f "$SRC_BPE_CODES" ]; then
  echo "BPE learned in $SRC_BPE_CODES"
 
  # apply BPE codes
-if ! [[ -f "$EMBED_SRC_TOK_CODES" ]]; then
+if ! [[ -f "$EMBED_SRC_TOK_CODES" || -f "$EMBED_SRC_TOK_CODES.vec" ]]; then
    echo "Applying BPE codes..."
    $FASTBPE applybpe $EMBED_SRC_TOK_CODES $EMBED_SRC_TOK $SRC_BPE_CODES
  fi
