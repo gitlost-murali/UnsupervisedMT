@@ -200,6 +200,21 @@ if ! [[ -f "$EMBED_SRC_TOK_CODES.vec" ]]; then
 fi
 echo "FastText embeddings of De in: $EMBED_SRC_TOK_CODES.vec"
 
+# concatenate monolingual data files
+if [[ -f "$EMBED_SRC_RAW" ]]; then
+  echo "Deleting monolingual data..."
+  rm $EMBED_SRC_RAW
+fi
+echo "DE monolingual data deleted i.e: $EMBED_SRC_RAW"
+
+# concatenate monolingual data files
+if [[ -f "$EMBED_SRC_TOK" ]]; then
+  echo "Deleting monolingual data..."
+  rm $EMBED_SRC_TOK
+fi
+echo "DE monolingual token data deleted i.e: $EMBED_SRC_TOK"
+
+
 #
 # Download monolingual data
 #
