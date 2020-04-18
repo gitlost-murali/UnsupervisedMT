@@ -287,7 +287,7 @@ echo "DE monolingual data tokenized in: $SRC_TOK"
 echo "HSB monolingual data tokenized in: $TGT_TOK"
 
 # learn BPE codes
-if [ ! -f "$SRC_BPE_CODES" ]; then
+if [ ! -f "$TGT_BPE_CODES" ]; then
    echo "Learning BPE codes..."
 #    $FASTBPE learnbpe $CODES $SRC_TOK  > $SRC_BPE_CODES
    $FASTBPE learnbpe $CODES $TGT_TOK  > $TGT_BPE_CODES
