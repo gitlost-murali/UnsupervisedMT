@@ -391,3 +391,6 @@ if ! [[ -f "$EMBED_TGT_TOK_CODES.vec" ]]; then
   $FASTTEXT skipgram -epoch $N_EPOCHS -minCount 0 -dim 300 -thread $N_THREADS -ws 5 -neg 10 -input $TGT_TOK_CODES -output $EMBED_TGT_TOK_CODES
 fi
 echo "FastText embeddings of De in: $EMBED_TGT_TOK_CODES.vec"
+
+cd $MUSE_DIR
+python unsupervised.py --src_lang de --tgt_lang hsb --src_emb "$EMBED_SRC_TOK_CODES.vec" --tgt_emb "$EMBED_TGT_TOK_CODES.vec" --n_refinement 5 --normalize_embeddings center --exp_path $EMBED_PATH --dis_most_frequent 51255
