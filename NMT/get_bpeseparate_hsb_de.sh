@@ -80,10 +80,10 @@ SRC_VALID=$PARA_PATH/devel.hsb-de.de
 TGT_VALID=$PARA_PATH/devel.hsb-de.hsb
 SRC_TEST=$PARA_PATH/devel_test.hsb-de.de
 TGT_TEST=$PARA_PATH/devel_test.hsb-de.hsb   # FOR THE SAKE OF BREVITY, I'M STORING TRAIN FILE IN TEST VARIABLE. BECAUSE WE DON'T TEST RIGHT AWAY, I'M DOING THIS. WHILE TESTING, USE DIFF DATA.
-SRC_VALID_CODES=$PARA_PATH/devel.hsb-de.de.bpe_$COUNT
-TGT_VALID_CODES=$PARA_PATH/devel.hsb-de.hsb.bpe_$COUNT
-SRC_TEST_CODES=$PARA_PATH/devel_test.hsb-de.de.bpe_$COUNT
-TGT_TEST_CODES=$PARA_PATH/devel_test.hsb-de.hsb.bpe_$COUNT
+SRC_VALID_CODES=$PARA_PATH/devel.hsb-de.de.bpe_$CODES
+TGT_VALID_CODES=$PARA_PATH/devel.hsb-de.hsb.bpe_$CODES
+SRC_TEST_CODES=$PARA_PATH/devel_test.hsb-de.de.bpe_$CODES
+TGT_TEST_CODES=$PARA_PATH/devel_test.hsb-de.hsb.bpe_$CODES
 #
 # Download and install tools
 #
