@@ -12,3 +12,6 @@ parser.add_argument("--dico_eval", type=str, default="", help="Path to evaluatio
 
 
 New code for Unsupervised Bilingual agreement will go in `trainer.py`'s function `otf_bt`. Line `685`
+
+Two scripts. One for using extra corpus for embeddings-`get_sepcorpus_bpeseparate_.....sh` 
+Other for only using the NMT mono corpus-`get_bpeseparate....sh`
