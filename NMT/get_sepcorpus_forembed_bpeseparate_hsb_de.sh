@@ -56,6 +56,12 @@ FASTTEXT=$FASTTEXT_DIR/fasttext
 MUSE_DIR=$PWD/embed/MUSE
 
 # files full paths
+EMBED_SRC_RAW=$EMBED_DATA_PATH/all.de
+EMBED_SRC_TOK=$EMBED_DATA_PATH/all.de.tok
+EMBED_SRC_TOK_CODES=$EMBED_DATA_PATH/all.de.tok.bpe_$CODES
+EMBED_TGT_TOK_CODES=$EMBED_DATA_PATH/all.hsb.tok.bpe_$CODES
+
+# files full paths
 SRC_RAW=$MONO_PATH/all.de
 TGT_RAW=$MONO_PATH/all.hsb
 SRC_TOK=$MONO_PATH/all.de.tok
@@ -133,6 +139,82 @@ if [ ! -f "$FASTTEXT" ]; then
 fi
 echo "fastText compiled in: $FASTTEXT"
 
+# Download Embedding data
+
+cd $EMBED_DATA_PATH
+echo "Downloading German files..."
+wget -c http://www.statmt.org/wmt14/training-monolingual-news-crawl/news.2007.de.shuffled.gz
+wget -c http://www.statmt.org/wmt14/training-monolingual-news-crawl/news.2008.de.shuffled.gz
+wget -c http://www.statmt.org/wmt14/training-monolingual-news-crawl/news.2009.de.shuffled.gz
+wget -c http://www.statmt.org/wmt14/training-monolingual-news-crawl/news.2010.de.shuffled.gz
+wget -c http://www.statmt.org/wmt14/training-monolingual-news-crawl/news.2011.de.shuffled.gz
+# wget -c http://www.statmt.org/wmt14/training-monolingual-news-crawl/news.2012.de.shuffled.gz
+# wget -c http://www.statmt.org/wmt14/training-monolingual-news-crawl/news.2013.de.shuffled.gz
+# wget -c http://www.statmt.org/wmt15/training-monolingual-news-crawl-v2/news.2014.de.shuffled.v2.gz
+# wget -c http://data.statmt.org/wmt16/translation-task/news.2015.de.shuffled.gz
+# wget -c http://data.statmt.org/wmt17/translation-task/news.2016.de.shuffled.gz
+# wget -c http://data.statmt.org/wmt18/translation-task/news.2017.de.shuffled.deduped.gz
+
+# decompress monolingual data
+for FILENAME in news*gz; do
+  OUTPUT="${FILENAME::-3}"
+  if [ ! -f "$OUTPUT" ]; then
+    echo "Decompressing $FILENAME..."
+    gunzip -k $FILENAME
+  else
+    echo "$OUTPUT already decompressed."
+  fi
+done
+
+# concatenate monolingual data files  #[[ -f "$EMBED_SRC_RAW"  ||  -f "$EMBED_SRC_TOK_CODES.vec" ]]
+if ! [[ -f "$EMBED_SRC_RAW"  ||  -f "$EMBED_SRC_TOK_CODES.vec" ]]; then
+  echo "Concatenating monolingual data..."
+  cat $(ls news*de* | grep -v gz) > $EMBED_SRC_RAW
+fi
+echo "DE monolingual data concatenated in: $EMBED_SRC_RAW"
+
+# tokenize data
+if ! [[ -f "$EMBED_SRC_TOK" || -f "$EMBED_SRC_TOK_CODES.vec" ]]; then
+  echo "Tokenize monolingual data..."
+  cat $EMBED_SRC_RAW | $NORM_PUNC -l de | $TOKENIZER -l de -no-escape -threads $N_THREADS > $EMBED_SRC_TOK
+fi
+echo "DE monolingual data tokenized in: $EMBED_SRC_TOK"
+
+# learn BPE codes
+if [ ! -f "$SRC_BPE_CODES" ]; then
+   echo "Learning BPE codes..."
+   $FASTBPE learnbpe $CODES $EMBED_SRC_TOK  > $SRC_BPE_CODES
+ fi
+ echo "BPE learned in $SRC_BPE_CODES"
+
+ # apply BPE codes
+if ! [[ -f "$EMBED_SRC_TOK_CODES" || -f "$EMBED_SRC_TOK_CODES.vec" ]]; then
+   echo "Applying BPE codes..."
+   $FASTBPE applybpe $EMBED_SRC_TOK_CODES $EMBED_SRC_TOK $SRC_BPE_CODES
+ fi
+ echo "BPE codes applied to DE in: $EMBED_SRC_TOK_CODES"
+
+if ! [[ -f "$EMBED_SRC_TOK_CODES.vec" ]]; then
+  echo "Training fastText on $EMBED_SRC_TOK_CODES..."
+  $FASTTEXT skipgram -epoch $N_EPOCHS -minCount 0 -dim 300 -thread $N_THREADS -ws 5 -neg 10 -input $EMBED_SRC_TOK_CODES -output $EMBED_SRC_TOK_CODES
+fi
+echo "FastText embeddings of De in: $EMBED_SRC_TOK_CODES.vec"
+
+# concatenate monolingual data files
+if [[ -f "$EMBED_SRC_RAW" ]]; then
+  echo "Deleting monolingual data..."
+  rm $EMBED_SRC_RAW
+fi
+echo "DE monolingual data deleted i.e: $EMBED_SRC_RAW"
+
+# concatenate monolingual data files
+if [[ -f "$EMBED_SRC_TOK" ]]; then
+  echo "Deleting monolingual data..."
+  rm $EMBED_SRC_TOK
+fi
+echo "DE monolingual token data deleted i.e: $EMBED_SRC_TOK"
+
+
 #
 # Download monolingual data
 #
@@ -207,7 +289,7 @@ echo "HSB monolingual data tokenized in: $TGT_TOK"
 # learn BPE codes
 if [ ! -f "$TGT_BPE_CODES" ]; then
    echo "Learning BPE codes..."
-   $FASTBPE learnbpe $CODES $SRC_TOK  > $SRC_BPE_CODES
+#    $FASTBPE learnbpe $CODES $SRC_TOK  > $SRC_BPE_CODES
    $FASTBPE learnbpe $CODES $TGT_TOK  > $TGT_BPE_CODES
  fi
  echo "BPE learned in $SRC_BPE_CODES and $TGT_BPE_CODES "
@@ -303,19 +385,12 @@ echo "    DE: $SRC_TEST_CODES.pth"
 echo "    HSB: $TGT_TEST_CODES.pth"
 echo ""
 
-#Embedding for SRC language
-if ! [[ -f "$SRC_TOK_CODES.vec" ]]; then
-  echo "Training fastText on $SRC_TOK_CODES..."
-  $FASTTEXT skipgram -epoch $N_EPOCHS -minCount 0 -dim 300 -thread $N_THREADS -ws 5 -neg 10 -input $SRC_TOK_CODES -output $SRC_TOK_CODES
-fi
-echo "FastText embeddings of De in: $SRC_TOK_CODES.vec"
-
 #Embedding for TGT language
-if ! [[ -f "$TGT_TOK_CODES.vec" ]]; then
+if ! [[ -f "$EMBED_TGT_TOK_CODES.vec" ]]; then
   echo "Training fastText on $TGT_TOK_CODES..."
-  $FASTTEXT skipgram -epoch $N_EPOCHS -minCount 0 -dim 300 -thread $N_THREADS -ws 5 -neg 10 -input $TGT_TOK_CODES -output $TGT_TOK_CODES
+  $FASTTEXT skipgram -epoch $N_EPOCHS -minCount 0 -dim 300 -thread $N_THREADS -ws 5 -neg 10 -input $TGT_TOK_CODES -output $EMBED_TGT_TOK_CODES
 fi
-echo "FastText embeddings of HSB in: $TGT_TOK_CODES.vec"
+echo "FastText embeddings of De in: $EMBED_TGT_TOK_CODES.vec"
 
 cd $MUSE_DIR
-python unsupervised.py --src_lang de --tgt_lang hsb --src_emb "$SRC_TOK_CODES.vec" --tgt_emb "$TGT_TOK_CODES.vec" --n_refinement 5 --normalize_embeddings center --exp_path $EMBED_PATH --dis_most_frequent 51255
+python unsupervised.py --src_lang de --tgt_lang hsb --src_emb "$EMBED_SRC_TOK_CODES.vec" --tgt_emb "$EMBED_TGT_TOK_CODES.vec" --n_refinement 5 --normalize_embeddings center --exp_path $EMBED_PATH --dis_most_frequent 51255
