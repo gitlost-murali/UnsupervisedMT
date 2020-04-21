@@ -9,3 +9,6 @@ In `line 216` of `MUSE/src/evaluation/evaluator.py`, write the following if you 
 
 Updated `line 61` of `MUSE/unsupervised.py`
 parser.add_argument("--dico_eval", type=str, default="", help="Path to evaluation dictionary. If an empty path is given, then don't use a dictionary to evaluate the aligned word embeddings.")
+
+
+New code for Unsupervised Bilingual agreement will go in `trainer.py`'s function `otf_bt`. Line `685`
