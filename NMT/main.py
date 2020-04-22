@@ -174,6 +174,8 @@ def get_parser():
                         help="Batch size")
     parser.add_argument("--group_by_size", type=bool_flag, default=True,
                         help="Sort sentences by size during the training")
+    parser.add_argument("--lambda_ubwe", type=float, default="0",
+                        help="Lambda Unsupervised Bilingual Word embeddings coefficient (0 to not use that method)")
     parser.add_argument("--lambda_xe_mono", type=str, default="0",
                         help="Cross-entropy reconstruction coefficient (autoencoding)")
     parser.add_argument("--lambda_xe_para", type=str, default="0",

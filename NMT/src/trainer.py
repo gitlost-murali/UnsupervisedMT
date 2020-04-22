@@ -18,7 +18,7 @@ from .utils import get_optimizer, parse_lambda_config, update_lambdas
 from .model import build_mt_model
 from .multiprocessing_event_loop import MultiprocessingEventLoop
 from .test import test_sharing
-
+from .wordcsls import build_dictionary
 
 logger = getLogger()
 
@@ -683,12 +683,24 @@ class TrainerMT(MultiprocessingEventLoop):
             sent2_input = torch.cat([bos, F.softmax(scores / backprop_temperature, -1)], 0)
             encoded = self.encoder(sent2_input, len2, lang_id=lang2_id)
 
+        if params.lambda_ubwe > 0:        
+            lang1_dico = self.data['dico'][lang1] #.id2word[0] #.word2id['<s>']
+            lang2_dico = self.data['dico'][lang2] #.id2word[0]
+            enc_lang1_embedding = self.encoder.embeddings[lang1_id].weight.data
+            enc_lang2_embedding = self.encoder.embeddings[lang2_id].weight.data
+            (lang1_dicopairs, lang2_dicopairs) = build_dictionary(enc_lang1_embedding,enc_lang2_embedding,cuda=True)
+            # lang1_dicopairs ==> [[s1,t1],[s2,t2],]
+            langemb12_loss = torch.sum( 1 - F.cosine_similarity( self.encoder.embeddings[lang1_id](lang1_dicopairs[:,0]), self.encoder.embeddings[lang2_id](lang1_dicopairs[:,1]),1) ) / lang1_dicopairs.size(0) 
+            langemb21_loss = torch.sum( 1 - F.cosine_similarity( self.encoder.embeddings[lang2_id](lang2_dicopairs[:,0]), self.encoder.embeddings[lang1_id](lang2_dicopairs[:,1]),1) ) / lang2_dicopairs.size(0)
+            lagreement = langemb12_loss + langemb21_loss
+            print('lagreement is',lagreement)
         # cross-entropy scores / loss
         scores = self.decoder(encoded, sent3[:-1], lang_id=lang3_id)
         xe_loss = loss_fn(scores.view(-1, n_words3), sent3[1:].view(-1))
         self.stats['xe_costs_%s_%s_%s' % direction].append(xe_loss.item())
         assert lambda_xe > 0
         loss = lambda_xe * xe_loss
+        if params.lambda_ubwe > 0: loss = loss + lagreement
 
         # check NaN
         if (loss != loss).data.any():
