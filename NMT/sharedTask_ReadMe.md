@@ -15,3 +15,7 @@ New code for Unsupervised Bilingual agreement will go in `trainer.py`'s function
 
 Two scripts. One for using extra corpus for embeddings-`get_sepcorpus_bpeseparate_.....sh` 
 Other for only using the NMT mono corpus-`get_bpeseparate....sh`
+
+## UBWE agreement paper inclusion
+
+Add flag --lambda_ubwe > 0 for UBWE paper inclusion. 
