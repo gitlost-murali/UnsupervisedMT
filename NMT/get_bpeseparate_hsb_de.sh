@@ -318,4 +318,4 @@ fi
 echo "FastText embeddings of HSB in: $TGT_TOK_CODES.vec"
 
 cd $MUSE_DIR
-python unsupervised.py --src_lang de --tgt_lang hsb --src_emb "$SRC_TOK_CODES.vec" --tgt_emb "$TGT_TOK_CODES.vec" --n_refinement 5 --normalize_embeddings center --exp_path $EMBED_PATH --dis_most_frequent 51255
+python unsupervised.py --src_lang de --tgt_lang hsb --src_emb "$SRC_TOK_CODES.vec" --tgt_emb "$TGT_TOK_CODES.vec" --n_refinement 5 --normalize_embeddings center --exp_path $EMBED_PATH --dis_most_frequent 51019
