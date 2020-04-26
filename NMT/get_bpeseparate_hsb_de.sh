@@ -263,6 +263,8 @@ wget -c http://statmt.org/wmt20/unsup_and_very_low_res/train.hsb-de.de.gz
 
 echo "Extracting parallel data..."
 tar -xvzf devtest.tar.gz
+gunzip train.hsb-de.hsb.gz
+gunzip train.hsb-de.de.gz
 
 # check valid and test files are here
 if ! [[ -f "$SRC_VALID" ]]; then echo "$SRC_VALID is not found!"; exit; fi
