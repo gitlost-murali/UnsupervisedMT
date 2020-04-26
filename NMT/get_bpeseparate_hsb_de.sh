@@ -161,22 +161,9 @@ echo "Downloading Sorbian files..."
 wget -c http://statmt.org/wmt20/unsup_and_very_low_res/sorbian_institute_monolingual.hsb.gz 
 wget -c http://statmt.org/wmt20/unsup_and_very_low_res/witaj_monolingual.hsb.gz
 wget -c http://statmt.org/wmt20/unsup_and_very_low_res/web_monolingual.hsb.gz
-wget -c http://statmt.org/wmt20/unsup_and_very_low_res/train.hsb-de.hsb.gz #  adding it here because we have less mono data. Suggested by the website.
-wget -c http://statmt.org/wmt20/unsup_and_very_low_res/train.hsb-de.de.gz
 
 # decompress monolingual data
 for FILENAME in news*gz; do
-  OUTPUT="${FILENAME::-3}"
-  if [ ! -f "$OUTPUT" ]; then
-    echo "Decompressing $FILENAME..."
-    gunzip -k $FILENAME
-  else
-    echo "$OUTPUT already decompressed."
-  fi
-done
-
-# decompress monolingual of train data
-for FILENAME in de*gz; do
   OUTPUT="${FILENAME::-3}"
   if [ ! -f "$OUTPUT" ]; then
     echo "Decompressing $FILENAME..."
@@ -202,7 +189,6 @@ if ! [[ -f "$SRC_RAW" && -f "$TGT_RAW" ]]; then
   echo "Concatenating monolingual data..."
   cat $(ls news*de* | grep -v gz) | head -n $N_MONO > $SRC_RAW
   cat $(ls *monolingual.hsb* | grep -v gz) | head -n $N_MONO > $TGT_RAW
-  cat $TGT_TRAIN | head -n $N_MONO >> $TGT_RAW # Appending parallel training data.
 fi
 echo "DE monolingual data concatenated in: $SRC_RAW"
 echo "HSB monolingual data concatenated in: $TGT_RAW"
@@ -272,6 +258,8 @@ cd $PARA_PATH
 
 echo "Downloading parallel data..."
 wget -c http://www.statmt.org/wmt20/unsup_and_very_low_res/devtest.tar.gz
+wget -c http://statmt.org/wmt20/unsup_and_very_low_res/train.hsb-de.hsb.gz 
+wget -c http://statmt.org/wmt20/unsup_and_very_low_res/train.hsb-de.de.gz
 
 echo "Extracting parallel data..."
 tar -xvzf devtest.tar.gz
@@ -288,6 +276,8 @@ if ! [[ -f "$TGT_TEST" ]]; then echo "$TGT_TEST is not found!"; exit; fi
 # $INPUT_FROM_SGM < $SRC_TEST.sgm | $NORM_PUNC -l en | $REM_NON_PRINT_CHAR | $TOKENIZER -l en -no-escape -threads $N_THREADS > $SRC_TEST
 # $INPUT_FROM_SGM < $TGT_TEST.sgm | $NORM_PUNC -l fr | $REM_NON_PRINT_CHAR | $TOKENIZER -l fr -no-escape -threads $N_THREADS > $TGT_TEST
 #
+
+# cat $TGT_TRAIN | head -n $N_MONO >> $TGT_RAW # Appending parallel training data.
 
 echo "Applying BPE to valid and test files..."
 $FASTBPE applybpe $SRC_TRAIN_CODES $SRC_TRAIN $SRC_BPE_CODES $SRC_VOCAB
