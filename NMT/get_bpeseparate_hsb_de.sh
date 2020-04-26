@@ -98,7 +98,7 @@ echo "Moses found in: $MOSES"
 cd $EMBED_PATH
 if [ ! -d "$MUSE_DIR" ]; then
   echo "Cloning MUSE from GitHub repository..."
-  git clone https://github.com/facebookresearch/MUSE.git
+  git clone https://github.com/gitlost-murali/MUSE.git
 fi
 echo "MUSE found in: $MUSE_DIR"
 
