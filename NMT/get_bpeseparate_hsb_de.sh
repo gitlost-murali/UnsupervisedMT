@@ -70,10 +70,14 @@ TGT_BPE_CODES=$MONO_PATH/hsb_bpe_codes
 SRC_VOCAB=$MONO_PATH/bpe_vocab.de
 TGT_VOCAB=$MONO_PATH/bpe_vocab.hsb
 #FULL_VOCAB=$MONO_PATH/vocab.de-hsb.$CODES
+SRC_TRAIN=$PARA_PATH/train.hsb-de.de
+TGT_TRAIN=$PARA_PATH/train.hsb-de.hsb
 SRC_VALID=$PARA_PATH/devel.hsb-de.de
 TGT_VALID=$PARA_PATH/devel.hsb-de.hsb
 SRC_TEST=$PARA_PATH/devel_test.hsb-de.de
 TGT_TEST=$PARA_PATH/devel_test.hsb-de.hsb   # FOR THE SAKE OF BREVITY, I'M STORING TRAIN FILE IN TEST VARIABLE. BECAUSE WE DON'T TEST RIGHT AWAY, I'M DOING THIS. WHILE TESTING, USE DIFF DATA.
+SRC_TRAIN_CODES=$PARA_PATH/train.hsb-de.de.bpe_$CODES
+TGT_TRAIN_CODES=$PARA_PATH/train.hsb-de.hsb.bpe_$CODES
 SRC_VALID_CODES=$PARA_PATH/devel.hsb-de.de.bpe_$CODES
 TGT_VALID_CODES=$PARA_PATH/devel.hsb-de.hsb.bpe_$CODES
 SRC_TEST_CODES=$PARA_PATH/devel_test.hsb-de.de.bpe_$CODES
@@ -157,7 +161,8 @@ echo "Downloading Sorbian files..."
 wget -c http://statmt.org/wmt20/unsup_and_very_low_res/sorbian_institute_monolingual.hsb.gz 
 wget -c http://statmt.org/wmt20/unsup_and_very_low_res/witaj_monolingual.hsb.gz
 wget -c http://statmt.org/wmt20/unsup_and_very_low_res/web_monolingual.hsb.gz
-
+wget -c http://statmt.org/wmt20/unsup_and_very_low_res/train.hsb-de.hsb.gz #  adding it here because we have less mono data. Suggested by the website.
+wget -c http://statmt.org/wmt20/unsup_and_very_low_res/train.hsb-de.de.gz
 
 # decompress monolingual data
 for FILENAME in news*gz; do
@@ -185,7 +190,8 @@ done
 if ! [[ -f "$SRC_RAW" && -f "$TGT_RAW" ]]; then
   echo "Concatenating monolingual data..."
   cat $(ls news*de* | grep -v gz) | head -n $N_MONO > $SRC_RAW
-  cat $(ls *hsb* | grep -v gz) | head -n $N_MONO > $TGT_RAW
+  cat $(ls *monolingual.hsb* | grep -v gz) | head -n $N_MONO > $TGT_RAW
+  cat $TGT_TRAIN | head -n $N_MONO >> $TGT_RAW # Appending parallel training data.
 fi
 echo "DE monolingual data concatenated in: $SRC_RAW"
 echo "HSB monolingual data concatenated in: $TGT_RAW"
@@ -273,14 +279,18 @@ if ! [[ -f "$TGT_TEST" ]]; then echo "$TGT_TEST is not found!"; exit; fi
 #
 
 echo "Applying BPE to valid and test files..."
+$FASTBPE applybpe $SRC_TRAIN_CODES $SRC_TRAIN $SRC_BPE_CODES $SRC_VOCAB
+$FASTBPE applybpe $TGT_TRAIN_CODES $TGT_TRAIN $TGT_BPE_CODES $TGT_VOCAB
 $FASTBPE applybpe $SRC_VALID_CODES $SRC_VALID $SRC_BPE_CODES $SRC_VOCAB
 $FASTBPE applybpe $TGT_VALID_CODES $TGT_VALID $TGT_BPE_CODES $TGT_VOCAB
 $FASTBPE applybpe $SRC_TEST_CODES $SRC_TEST $SRC_BPE_CODES $SRC_VOCAB
 $FASTBPE applybpe $TGT_TEST_CODES $TGT_TEST $TGT_BPE_CODES $TGT_VOCAB
 
 echo "Binarizing data..."
-rm -f $SRC_VALID.$CODES.pth $TGT_VALID.$CODES.pth $SRC_TEST.$CODES.pth $TGT_TEST.$CODES.pth
+rm -f $SRC_TRAIN_CODES.pth $TGT_TRAIN_CODES.pth $SRC_VALID_CODES.pth $TGT_VALID_CODES.pth $SRC_TEST_CODES.pth $TGT_TEST_CODES.pth
  
+$UMT_PATH/preprocess.py $SRC_VOCAB $SRC_TRAIN_CODES
+$UMT_PATH/preprocess.py $TGT_VOCAB $TGT_TRAIN_CODES
 $UMT_PATH/preprocess.py $SRC_VOCAB $SRC_VALID_CODES
 $UMT_PATH/preprocess.py $TGT_VOCAB $TGT_VALID_CODES
 $UMT_PATH/preprocess.py $SRC_VOCAB $SRC_TEST_CODES
@@ -295,10 +305,13 @@ echo "===== Data summary"
 echo "Monolingual training data:"
 echo "    DE: $SRC_TOK_CODES.pth"
 echo "    HSB: $TGT_TOK_CODES.pth"
+echo "Parallel training data:"
+echo "    DE: $SRC_TRAIN_CODES.pth"
+echo "    HSB: $TGT_TRAIN_CODES.pth"
 echo "Parallel validation data:"
 echo "    DE: $SRC_VALID_CODES.pth"
 echo "    HSB: $TGT_VALID_CODES.pth"
-# echo "Parallel test data:"
+echo "Parallel test data:"
 echo "    DE: $SRC_TEST_CODES.pth"
 echo "    HSB: $TGT_TEST_CODES.pth"
 echo ""
