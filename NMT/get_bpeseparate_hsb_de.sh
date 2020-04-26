@@ -175,6 +175,17 @@ for FILENAME in news*gz; do
   fi
 done
 
+# decompress monolingual of train data
+for FILENAME in de*gz; do
+  OUTPUT="${FILENAME::-3}"
+  if [ ! -f "$OUTPUT" ]; then
+    echo "Decompressing $FILENAME..."
+    gunzip -k $FILENAME
+  else
+    echo "$OUTPUT already decompressed."
+  fi
+done
+
 # decompress monolingual data
 for FILENAME in *hsb*gz; do
   OUTPUT="${FILENAME::-3}"
