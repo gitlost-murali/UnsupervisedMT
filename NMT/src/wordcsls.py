@@ -160,7 +160,7 @@ def build_dictionary(src_emb, tgt_emb,cuda):
     Build a training dictionary given current embeddings / mapping.
     """
 #     logger.info("Building the train dictionary ...")
-    print("Building the train dictionary ...")
+    # print("Building the train dictionary ...")
     s2t = True
     t2s = True
     assert s2t or t2s
@@ -178,8 +178,8 @@ def build_dictionary(src_emb, tgt_emb,cuda):
     t2s_dico = torch.LongTensor(list([[int(a), int(b)] for (a, b) in t2s_candidates]))
 
 #     logger.info('New train dictionary of %i pairs.' % dico.size(0))
-    print('New s2t train dictionary of %i pairs.' % s2t_dico.size(0))
-    print('New t2s train dictionary of %i pairs.' % t2s_dico.size(0))
+    # print('New s2t train dictionary of %i pairs.' % s2t_dico.size(0))
+    # print('New t2s train dictionary of %i pairs.' % t2s_dico.size(0))
     s2t_dico = s2t_dico.cuda() if cuda else s2t_dico
     t2s_dico = t2s_dico.cuda() if cuda else t2s_dico
     return (s2t_dico, t2s_dico)

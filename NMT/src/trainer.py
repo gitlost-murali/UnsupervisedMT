@@ -693,7 +693,9 @@ class TrainerMT(MultiprocessingEventLoop):
             langemb12_loss = torch.sum( 1 - F.cosine_similarity( self.encoder.embeddings[lang1_id](lang1_dicopairs[:,0]), self.encoder.embeddings[lang2_id](lang1_dicopairs[:,1]),1) ) / lang1_dicopairs.size(0) 
             langemb21_loss = torch.sum( 1 - F.cosine_similarity( self.encoder.embeddings[lang2_id](lang2_dicopairs[:,0]), self.encoder.embeddings[lang1_id](lang2_dicopairs[:,1]),1) ) / lang2_dicopairs.size(0)
             lagreement = langemb12_loss + langemb21_loss
-            print('lagreement is',lagreement)
+            lagreement = params.lambda_ubwe * lagreement
+            self.stats['lagreement_loss_%s_%s' % (lang1,lang2)] = self.stats.get('lagreement_loss_%s_%s' % (lang1,lang2),[]) + [lagreement.item()]
+
         # cross-entropy scores / loss
         scores = self.decoder(encoded, sent3[:-1], lang_id=lang3_id)
         xe_loss = loss_fn(scores.view(-1, n_words3), sent3[1:].view(-1))
@@ -755,6 +757,10 @@ class TrainerMT(MultiprocessingEventLoop):
                 mean_loss.append(('LMD-%s' % lang, 'lmd_costs_%s' % lang))
                 mean_loss.append(('LMER-%s' % lang, 'lmer_costs_%s' % lang))
                 mean_loss.append(('ENC-L2-%s' % lang, 'enc_norms_%s' % lang))
+
+            if self.params.lambda_ubwe > 0:
+                for lang1, lang2 in self.params.para_directions:
+                    mean_loss.append(('UBWEp1-%s-%s' % (lang1, lang2), 'lagreement_loss_%s_%s' % (lang1, lang2)))
 
             s_iter = "%7i - " % self.n_iter
             s_stat = ' || '.join(['{}: {:7.4f}'.format(k, np.mean(self.stats[l]))
